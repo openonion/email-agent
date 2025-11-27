@@ -1,11 +1,11 @@
 [project]
-name = "gmail-agent"
+name = "email-agent"
 created = "2025-11-20T16:40:25.014324"
 framework_version = "0.4.2"
 
 [cli]
 version = "1.0.0"
-command = "co create gmail-agent"
+command = "co create email-agent"
 template = "minimal"
 
 [agent]

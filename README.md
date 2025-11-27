@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="https://connectonion.com/logo.png" alt="Gmail Agent" width="120">
+  <img src="https://connectonion.com/logo.png" alt="Email Agent" width="120">
 </p>
 
-<h1 align="center">Gmail Agent</h1>
+<h1 align="center">Email Agent</h1>
 
 <p align="center">
   <strong>Your Gmail inbox, powered by AI.</strong><br>
@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/openonion/gmail-agent/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue.svg" alt="License"></a>
+  <a href="https://github.com/openonion/email-agent/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue.svg" alt="License"></a>
   <a href="https://discord.gg/4xfD9k8AUF"><img src="https://img.shields.io/discord/1234567890?color=7289da&label=discord" alt="Discord"></a>
   <a href="https://docs.connectonion.com"><img src="https://img.shields.io/badge/docs-connectonion.com-green" alt="Docs"></a>
 </p>
@@ -44,8 +44,8 @@ Built with [ConnectOnion](https://connectonion.com) - the Python framework for A
 
 ```bash
 pip install connectonion
-git clone https://github.com/openonion/gmail-agent.git
-cd gmail-agent
+git clone https://github.com/openonion/email-agent.git
+cd email-agent
 pip install -r requirements.txt
 ```
 
@@ -63,7 +63,7 @@ After authentication, you'll see an interactive prompt with autocomplete:
 
 ```
 ┌────────────────────────────────────────────────┐
-│ Gmail CRM Agent                                │
+│ Email Agent                                    │
 │                                                │
 │ Quick Start:                                   │
 │   /inbox      Check your emails                │
@@ -267,7 +267,7 @@ from:bob has:attachment after:2025/11/01
 ## Project Structure
 
 ```
-gmail-agent/
+email-agent/
 ├── cli.py              # Entry point
 ├── cli/                # CLI package
 │   ├── __init__.py     # Exports app
@@ -308,7 +308,7 @@ todo = TodoList()         # Task tracking
 
 # Agent combines LLM + tools + plugins
 agent = Agent(
-    name="gmail-agent",
+    name="email-agent",
     tools=[gmail, calendar, memory, shell, todo],
     plugins=[react],      # ReAct reasoning pattern
     model="co/gemini-2.5-pro",
@@ -483,7 +483,7 @@ Agent traces full email history, shows timeline, identifies pending actions.
 Join our community to get help, share projects, and chat with the team:
 
 - **[Discord](https://discord.gg/4xfD9k8AUF)** - Chat and support
-- **[GitHub Issues](https://github.com/openonion/gmail-agent/issues)** - Bug reports and feature requests
+- **[GitHub Issues](https://github.com/openonion/email-agent/issues)** - Bug reports and feature requests
 - **[ConnectOnion Website](https://connectonion.com)** - Framework homepage
 
 ## Contributing

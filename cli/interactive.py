@@ -1,5 +1,5 @@
 """
-Interactive mode for Gmail Agent CLI.
+Interactive mode for Email Agent CLI.
 
 Full-featured REPL with slash commands and autocomplete.
 """
@@ -71,7 +71,7 @@ def interactive():
 
     # Welcome with quick start guide
     console.print(Panel(
-        "[bold cyan]Gmail CRM Agent[/bold cyan]\n\n"
+        "[bold cyan]Email Agent[/bold cyan]\n\n"
         "[bold]Quick Start:[/bold]\n"
         "  [green]/inbox[/green]      Check your emails\n"
         "  [green]/contacts[/green]   View your contacts\n"

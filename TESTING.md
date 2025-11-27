@@ -1,4 +1,4 @@
-# Testing Gmail Agent
+# Testing Email Agent
 
 ## Test Organization
 

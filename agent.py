@@ -1,5 +1,5 @@
 """
-Gmail Agent - Gmail reading and management with memory
+Email Agent - Email reading and management with memory
 
 Purpose: Read, search, and manage your actual Gmail inbox
 Pattern: Use ConnectOnion Gmail class + Memory system + GoogleCalendar + Shell + Plugins
@@ -50,7 +50,7 @@ def init_crm_database(max_emails: int = 500, top_n: int = 10, exclude_domains: s
 
 # Create main agent with Gmail, Memory, Calendar, Shell, Todo, AND init wrapper function
 agent = Agent(
-    name="gmail-agent",
+    name="email-agent",
     system_prompt="prompts/gmail_agent.md",
     tools=[gmail, memory, calendar, shell, todo, init_crm_database],
     plugins=[react],  # ReAct pattern for better reasoning
@@ -60,7 +60,7 @@ agent = Agent(
 
 # Example usage
 if __name__ == "__main__":
-    print("=== Gmail CRM Agent ===\n")
+    print("=== Email Agent ===\n")
 
     # Example 1: Initialize CRM database using wrapper function
     print("1. Initialize CRM database...")

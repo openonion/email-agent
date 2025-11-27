@@ -1,4 +1,4 @@
-"""Tests for Gmail Agent CLI."""
+"""Tests for Email Agent CLI."""
 
 import pytest
 from datetime import datetime, timedelta

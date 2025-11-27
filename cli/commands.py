@@ -1,5 +1,5 @@
 """
-Typer CLI commands for Gmail Agent.
+Typer CLI commands for Email Agent.
 
 All commands use the core do_* functions from cli.core.
 """
@@ -17,8 +17,8 @@ from .setup import check_setup
 from .interactive import interactive
 
 app = typer.Typer(
-    name="gmail",
-    help="Gmail CRM Agent - Interactive Gmail from your terminal",
+    name="email",
+    help="Email Agent - Interactive email management from your terminal",
     invoke_without_command=True
 )
 console = Console()
@@ -26,7 +26,7 @@ console = Console()
 
 @app.callback()
 def main(ctx: typer.Context):
-    """Gmail CRM Agent - Interactive Gmail management from your terminal."""
+    """Email Agent - Interactive email management from your terminal."""
     if ctx.invoked_subcommand is None:
         if check_setup():
             interactive()

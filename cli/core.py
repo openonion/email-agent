@@ -1,5 +1,5 @@
 """
-Core logic functions for Gmail Agent CLI.
+Core logic functions for Email Agent CLI.
 
 These functions are shared by CLI commands and interactive slash commands.
 """

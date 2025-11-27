@@ -1,5 +1,5 @@
 """
-Setup and auth checks for Gmail Agent CLI.
+Setup and auth checks for Email Agent CLI.
 """
 
 from pathlib import Path

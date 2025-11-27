@@ -1,4 +1,4 @@
-"""Test the Gmail Agent functionality."""
+"""Test the Email Agent functionality."""
 
 import os
 import shutil
@@ -9,7 +9,7 @@ from agent import agent
 
 def test_agent_creation():
     """Test that agent is created with correct configuration."""
-    assert agent.name == "gmail-agent"
+    assert agent.name == "email-agent"
     assert agent.max_iterations == 15
 
 
@@ -17,10 +17,10 @@ def test_agent_has_email_tools():
     """Test that agent has access to email tools."""
     tool_names = [tool.name for tool in agent.tools]
 
-    assert "get_emails" in tool_names
-    assert "send_email" in tool_names
+    assert "read_inbox" in tool_names
+    assert "search_emails" in tool_names
+    assert "send" in tool_names
     assert "mark_read" in tool_names
-    assert "mark_unread" in tool_names
 
 
 def test_agent_has_memory_tools():

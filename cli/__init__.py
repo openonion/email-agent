@@ -1,5 +1,5 @@
 """
-Gmail Agent CLI package.
+Email Agent CLI package.
 
 Structure:
 - core.py      - Core logic functions (do_inbox, do_search, etc.)

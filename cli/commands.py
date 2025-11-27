@@ -1,0 +1,121 @@
+"""
+Typer CLI commands for Gmail Agent.
+
+All commands use the core do_* functions from cli.core.
+"""
+
+import typer
+from rich.console import Console
+from rich.panel import Panel
+from rich.markdown import Markdown
+
+from .core import (
+    do_inbox, do_search, do_contacts, do_sync,
+    do_init, do_unanswered, do_identity, do_today, do_ask
+)
+from .setup import check_setup
+from .interactive import interactive
+
+app = typer.Typer(
+    name="gmail",
+    help="Gmail CRM Agent - Interactive Gmail from your terminal",
+    invoke_without_command=True
+)
+console = Console()
+
+
+@app.callback()
+def main(ctx: typer.Context):
+    """Gmail CRM Agent - Interactive Gmail management from your terminal."""
+    if ctx.invoked_subcommand is None:
+        if check_setup():
+            interactive()
+
+
+@app.command()
+def inbox(
+    count: int = typer.Option(10, "--count", "-n", help="Number of emails to show"),
+    unread: bool = typer.Option(False, "--unread", "-u", help="Only show unread emails")
+):
+    """Show recent inbox emails."""
+    with console.status("[bold blue]Fetching emails...[/bold blue]"):
+        result = do_inbox(count=count, unread=unread)
+    console.print(Panel(result, title="[bold]Inbox[/bold]", border_style="green"))
+
+
+@app.command()
+def search(
+    query: str = typer.Argument(..., help="Gmail search query"),
+    count: int = typer.Option(10, "--count", "-n", help="Number of results")
+):
+    """Search emails using Gmail query syntax."""
+    with console.status(f"[bold blue]Searching...[/bold blue]"):
+        result = do_search(query=query, count=count)
+    console.print(Panel(result, title=f"[bold]Search: {query}[/bold]", border_style="yellow"))
+
+
+@app.command()
+def contacts():
+    """Show cached contacts."""
+    result = do_contacts()
+    console.print(Panel(result, title="[bold]Contacts[/bold]", border_style="cyan"))
+
+
+@app.command()
+def sync(
+    max_emails: int = typer.Option(500, "--max", "-m", help="Max emails to scan"),
+    exclude: str = typer.Option("openonion.ai,connectonion.com", "--exclude", "-e", help="Domains to exclude")
+):
+    """Sync contacts from Gmail."""
+    with console.status("[bold blue]Syncing contacts...[/bold blue]"):
+        result = do_sync(max_emails=max_emails, exclude=exclude)
+    console.print(Panel(result, title="[bold]Sync Complete[/bold]", border_style="green"))
+
+
+@app.command()
+def init(
+    max_emails: int = typer.Option(500, "--max", "-m", help="Max emails to scan"),
+    top_n: int = typer.Option(10, "--top", "-t", help="Top contacts to analyze"),
+    exclude: str = typer.Option("openonion.ai,connectonion.com", "--exclude", "-e", help="Domains to exclude")
+):
+    """Initialize CRM database."""
+    console.print("[dim]Initializing CRM (this may take a few minutes)...[/dim]")
+    with console.status("[bold blue]Processing...[/bold blue]"):
+        result = do_init(max_emails=max_emails, top_n=top_n, exclude=exclude)
+    console.print(Panel(Markdown(result), title="[bold green]CRM Initialized[/bold green]", border_style="green"))
+
+
+@app.command()
+def unanswered(
+    days: int = typer.Option(120, "--days", "-d", help="Look back N days"),
+    count: int = typer.Option(20, "--count", "-n", help="Max results")
+):
+    """Find emails you haven't replied to."""
+    with console.status("[bold blue]Finding unanswered emails...[/bold blue]"):
+        result = do_unanswered(days=days, count=count)
+    console.print(Panel(result, title="[bold]Unanswered[/bold]", border_style="red"))
+
+
+@app.command()
+def identity(detect: bool = typer.Option(False, "--detect", "-d", help="Detect forwarded addresses")):
+    """Show your email identity."""
+    with console.status("[bold blue]Getting identity...[/bold blue]"):
+        result = do_identity(detect=detect)
+    console.print(Panel(result, title="[bold]Identity[/bold]", border_style="cyan"))
+
+
+@app.command()
+def today():
+    """Daily email briefing."""
+    console.print("[dim]Analyzing today's emails...[/dim]")
+    with console.status("[bold blue]Fetching and analyzing...[/bold blue]"):
+        result = do_today()
+    console.print(Panel(Markdown(result), title="[bold blue]Today's Briefing[/bold blue]", border_style="blue"))
+
+
+@app.command()
+def ask(question: str = typer.Argument(..., help="Question to ask the agent")):
+    """Ask a single question to the Gmail agent."""
+    with console.status("[bold blue]Thinking...[/bold blue]"):
+        result = do_ask(question)
+    console.print(Panel(Markdown(result), title="[bold blue]Agent[/bold blue]", border_style="blue"))

@@ -2,22 +2,26 @@
 Gmail Agent - Gmail reading and management with memory
 
 Purpose: Read, search, and manage your actual Gmail inbox
-Pattern: Use ConnectOnion Gmail class + Memory system
+Pattern: Use ConnectOnion Gmail class + Memory system + GoogleCalendar + Shell + Plugins
 """
 
-from connectonion import Agent, Memory, Gmail, WebFetch
+from connectonion import Agent, Memory, Gmail, GoogleCalendar, WebFetch, Shell, TodoList
+from connectonion.useful_plugins import react
 
 
 # Create shared tool instances (Gmail defaults to data/emails.csv and data/contacts.csv)
 memory = Memory(memory_file="data/memory.md")
 gmail = Gmail()  # Uses default paths: data/emails.csv, data/contacts.csv
+calendar = GoogleCalendar()  # For calendar events and meeting invites
 web = WebFetch()  # For analyzing contact domains
+shell = Shell()  # For running shell commands (e.g., get current date)
+todo = TodoList()  # For tracking multi-step tasks
 
 # Create init sub-agent for CRM database setup
 init_crm = Agent(
     name="crm-init",
     system_prompt="prompts/crm_init.md",
-    tools=[gmail, memory, web],  # Gmail + Memory + WebFetch for domain analysis
+    tools=[gmail, memory, calendar, web],  # Gmail + Memory + Calendar + WebFetch
     max_iterations=30,
     model="co/gemini-2.5-pro",
     log=False  # Don't create separate log file
@@ -44,13 +48,14 @@ def init_crm_database(max_emails: int = 500, top_n: int = 10, exclude_domains: s
     return f"CRM INITIALIZATION COMPLETE. Data saved to memory. Use read_memory() to access:\n- crm:all_contacts\n- crm:needs_reply\n- crm:init_report\n- contact:email@example.com\n\nDetails: {result}"
 
 
-# Create main agent with Gmail, Memory, AND init wrapper function
+# Create main agent with Gmail, Memory, Calendar, Shell, Todo, AND init wrapper function
 agent = Agent(
     name="gmail-agent",
     system_prompt="prompts/gmail_agent.md",
-    tools=[gmail, memory, init_crm_database],  # Wrapper function instead of agent!
+    tools=[gmail, memory, calendar, shell, todo, init_crm_database],
+    plugins=[react],  # ReAct pattern for better reasoning
     max_iterations=15,
-    model="co/gemini-2.5-pro"
+    model="co/gemini-2.5-pro",
 )
 
 # Example usage

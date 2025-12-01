@@ -1,7 +1,7 @@
 """
 Interactive mode for Email Agent CLI.
 
-Full-featured REPL with slash commands and autocomplete.
+Full-featured REPL with slash commands and autocomplete using ConnectOnion TUI.
 """
 
 from rich.console import Console
@@ -9,65 +9,46 @@ from rich.panel import Panel
 from rich.markdown import Markdown
 from rich.prompt import Prompt
 from rich.columns import Columns
-from prompt_toolkit import PromptSession
-from prompt_toolkit.completion import Completer, Completion
-from prompt_toolkit.styles import Style
-from prompt_toolkit.formatted_text import HTML
+
+from connectonion.tui import Input, StaticProvider, StatusBar
 
 from agent import agent
 from .core import (
     do_inbox, do_search, do_contacts, do_sync,
     do_init, do_unanswered, do_identity, do_today, do_ask
 )
+from .contacts_provider import ContactProvider
 
 console = Console()
 
-COMMANDS = {
-    '/today': 'Daily email briefing',
-    '/inbox': 'Show recent emails',
-    '/init': 'Initialize CRM database',
-    '/identity': 'Show your email identity',
-    '/search': 'Search emails',
-    '/sync': 'Sync contacts from Gmail',
-    '/contacts': 'Show cached contacts',
-    '/unanswered': 'Find unanswered emails',
-    '/help': 'Show all commands',
-    '/quit': 'Exit',
-}
-
-
-class CommandCompleter(Completer):
-    """Auto-complete that shows suggestions as you type."""
-    def get_completions(self, document, complete_event):
-        text = document.text_before_cursor
-        if text.startswith('/'):
-            for cmd, desc in COMMANDS.items():
-                if cmd.startswith(text):
-                    yield Completion(cmd, start_position=-len(text), display_meta=desc)
+# Commands with descriptions and icons for StaticProvider
+COMMANDS = [
+    ("/today", "/today", "Daily email briefing", "📅"),
+    ("/inbox", "/inbox", "Show recent emails", "📥"),
+    ("/search", "/search", "Search emails", "🔍"),
+    ("/contacts", "/contacts", "View your contacts", "👥"),
+    ("/sync", "/sync", "Sync contacts from Gmail", "🔄"),
+    ("/init", "/init", "Initialize CRM database", "🗄️"),
+    ("/unanswered", "/unanswered", "Find unanswered emails", "⏳"),
+    ("/identity", "/identity", "Show your email identity", "🆔"),
+    ("/help", "/help", "Show all commands", "❓"),
+    ("/quit", "/quit", "Exit", "👋"),
+]
 
 
 def interactive():
     """Full interactive mode with command menu."""
-    # Session with auto-complete while typing and bottom toolbar
-    style = Style.from_dict({
-        'prompt': '#00d7ff bold',
-        'completion-menu': 'bg:#1e1e2e',
-        'completion-menu.completion': 'bg:#1e1e2e #00d7ff',
-        'completion-menu.completion.current': 'bg:#00d7ff #000000 bold',
-        'completion-menu.meta': 'bg:#1e1e2e #cdd6f4',
-        'completion-menu.meta.current': 'bg:#00d7ff #000000',
-        'bottom-toolbar': 'bg:#1e1e2e #89b4fa',
-    })
+    # Providers for autocomplete
+    command_provider = StaticProvider(COMMANDS)
+    contact_provider = ContactProvider()
 
-    def bottom_toolbar():
-        return HTML('<b>/</b> commands  <b>Tab</b> complete  <b>Enter</b> send  <b>Ctrl+C</b> exit')
-
-    session = PromptSession(
-        completer=CommandCompleter(),
-        complete_while_typing=True,
-        style=style,
-        bottom_toolbar=bottom_toolbar
-    )
+    # Hints (always visible) and rotating tips
+    hints = ["/ commands", "@ contacts", "Enter submit", "Ctrl+D quit"]
+    tips = [
+        "Try /today for your daily email briefing",
+        "Use @ to mention contacts in your messages",
+        "Type naturally to chat with the AI agent",
+    ]
 
     # Welcome with quick start guide
     console.print(Panel(
@@ -84,7 +65,24 @@ def interactive():
 
     while True:
         try:
-            user_input = session.prompt("\ngmail> ")
+            # Status bar at top
+            status = StatusBar([
+                ("📧", "Email Agent", "cyan"),
+                ("🤖", "co/gemini-2.5-pro", "magenta"),
+            ])
+            console.print()
+            console.print(status.render())
+
+            # Input with hints and rotating tips
+            user_input = Input(
+                triggers={
+                    "/": command_provider,
+                    "@": contact_provider,
+                },
+                hints=hints,
+                tips=tips,
+                divider=True,
+            ).run()
 
             if not user_input.strip():
                 continue
@@ -179,14 +177,8 @@ def interactive():
                 console.print(Panel(result, title="[bold]Identity[/bold]", border_style="cyan"))
 
             elif cmd.startswith('/'):
-                # Autocomplete: show matching commands
-                base_cmd = cmd.split()[0]
-                matches = [(c, desc) for c, desc in COMMANDS.items() if c.startswith(base_cmd)]
-                if matches:
-                    suggestions = '\n'.join(f"  [green]{c}[/green] - {desc}" for c, desc in matches)
-                    console.print(Panel(suggestions, title=f"[bold]Commands matching '{base_cmd}'[/bold]", border_style="yellow"))
-                else:
-                    console.print(f"[red]Unknown command: {cmd}[/red]. Type /help for commands.")
+                # Unknown command - suggest using /help
+                console.print(f"[red]Unknown command: {cmd}[/red]. Type /help for commands.")
 
             else:
                 # Chat with agent

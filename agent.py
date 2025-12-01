@@ -6,7 +6,7 @@ Pattern: Use ConnectOnion Gmail class + Memory system + GoogleCalendar + Shell +
 """
 
 from connectonion import Agent, Memory, Gmail, GoogleCalendar, WebFetch, Shell, TodoList
-from connectonion.useful_plugins import react
+from connectonion.useful_plugins import re_act, gmail_plugin, calendar_plugin
 
 
 # Create shared tool instances (Gmail defaults to data/emails.csv and data/contacts.csv)
@@ -53,7 +53,7 @@ agent = Agent(
     name="email-agent",
     system_prompt="prompts/gmail_agent.md",
     tools=[gmail, memory, calendar, shell, todo, init_crm_database],
-    plugins=[react],  # ReAct pattern for better reasoning
+    plugins=[re_act, gmail_plugin, calendar_plugin],  # ReAct + Gmail/Calendar approval
     max_iterations=15,
     model="co/gemini-2.5-pro",
 )

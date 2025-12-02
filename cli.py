@@ -9,6 +9,9 @@ Usage:
     email init         # Initialize CRM database
 """
 
+from dotenv import load_dotenv
+load_dotenv()  # Load .env before importing agent
+
 from cli import app
 
 if __name__ == "__main__":

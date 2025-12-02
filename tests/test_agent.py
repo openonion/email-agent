@@ -3,19 +3,37 @@
 import os
 import shutil
 import pytest
+from dotenv import load_dotenv
+
+# Load .env for tests
+load_dotenv()
+
 from connectonion import Memory
-from agent import agent
 
 
 def test_agent_creation():
     """Test that agent is created with correct configuration."""
-    assert agent.name == "email-agent"
-    assert agent.max_iterations == 15
+    # Set env var before importing agent
+    os.environ['LINKED_GMAIL'] = 'true'
+
+    # Force reimport
+    import importlib
+    import agent as agent_module
+    importlib.reload(agent_module)
+
+    assert agent_module.agent.name == "email-agent"
+    assert agent_module.agent.max_iterations == 15
 
 
-def test_agent_has_email_tools():
-    """Test that agent has access to email tools."""
-    tool_names = [tool.name for tool in agent.tools]
+def test_agent_has_email_tools_when_gmail_linked():
+    """Test that agent has access to email tools when Gmail is linked."""
+    os.environ['LINKED_GMAIL'] = 'true'
+
+    import importlib
+    import agent as agent_module
+    importlib.reload(agent_module)
+
+    tool_names = [tool.name for tool in agent_module.agent.tools]
 
     assert "read_inbox" in tool_names
     assert "search_emails" in tool_names
@@ -23,9 +41,27 @@ def test_agent_has_email_tools():
     assert "mark_read" in tool_names
 
 
+def test_agent_no_email_tools_when_not_linked():
+    """Test that agent has no email tools when nothing is linked."""
+    os.environ.pop('LINKED_GMAIL', None)
+    os.environ.pop('LINKED_OUTLOOK', None)
+
+    import importlib
+    import agent as agent_module
+    importlib.reload(agent_module)
+
+    assert len(agent_module.email_tools) == 0
+
+
 def test_agent_has_memory_tools():
     """Test that agent has access to memory tools."""
-    tool_names = [tool.name for tool in agent.tools]
+    os.environ['LINKED_GMAIL'] = 'true'
+
+    import importlib
+    import agent as agent_module
+    importlib.reload(agent_module)
+
+    tool_names = [tool.name for tool in agent_module.agent.tools]
 
     assert "write_memory" in tool_names
     assert "read_memory" in tool_names
@@ -52,6 +88,12 @@ def test_agent_basic_query():
 
     Run with: pytest tests/ -m real_api
     """
-    result = agent.input("List my memories")
+    os.environ['LINKED_GMAIL'] = 'true'
+
+    import importlib
+    import agent as agent_module
+    importlib.reload(agent_module)
+
+    result = agent_module.agent.input("List my memories")
     assert result is not None
     assert isinstance(result, str)

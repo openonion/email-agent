@@ -1,27 +1,59 @@
 """
 Email Agent - Email reading and management with memory
 
-Purpose: Read, search, and manage your actual Gmail inbox
-Pattern: Use ConnectOnion Gmail class + Memory system + GoogleCalendar + Shell + Plugins
+Purpose: Read, search, and manage your email inbox (Gmail and/or Outlook)
+Pattern: Use ConnectOnion email tools + Memory system + Calendar + Shell + Plugins
 """
 
-from connectonion import Agent, Memory, Gmail, GoogleCalendar, WebFetch, Shell, TodoList
+import os
+from connectonion import Agent, Memory, WebFetch, Shell, TodoList
 from connectonion.useful_plugins import re_act, gmail_plugin, calendar_plugin
 
 
-# Create shared tool instances (Gmail defaults to data/emails.csv and data/contacts.csv)
+# Create shared tool instances
 memory = Memory(memory_file="data/memory.md")
-gmail = Gmail()  # Uses default paths: data/emails.csv, data/contacts.csv
-calendar = GoogleCalendar()  # For calendar events and meeting invites
 web = WebFetch()  # For analyzing contact domains
 shell = Shell()  # For running shell commands (e.g., get current date)
 todo = TodoList()  # For tracking multi-step tasks
+
+# Build email/calendar tools based on .env flags
+# Note: Only one provider at a time (tools have overlapping method names)
+email_tools = []
+calendar_tools = []
+plugins = [re_act]
+
+has_gmail = os.getenv("LINKED_GMAIL", "").lower() == "true"
+has_outlook = os.getenv("LINKED_OUTLOOK", "").lower() == "true"
+
+# Prefer Gmail if both are linked (can only use one due to method name conflicts)
+if has_gmail:
+    from connectonion import Gmail, GoogleCalendar
+    email_tools.append(Gmail())
+    calendar_tools.append(GoogleCalendar())
+    plugins.append(gmail_plugin)
+    plugins.append(calendar_plugin)
+elif has_outlook:
+    from connectonion import Outlook, MicrosoftCalendar
+    email_tools.append(Outlook())
+    calendar_tools.append(MicrosoftCalendar())
+
+# Warn if no email provider configured
+if not email_tools:
+    print("\n⚠️  No email account connected. Use /link-gmail or /link-outlook to connect.\n")
+
+# Select prompt based on linked provider
+if has_gmail:
+    system_prompt = "prompts/gmail_agent.md"
+elif has_outlook:
+    system_prompt = "prompts/outlook_agent.md"
+else:
+    system_prompt = "prompts/gmail_agent.md"  # Default
 
 # Create init sub-agent for CRM database setup
 init_crm = Agent(
     name="crm-init",
     system_prompt="prompts/crm_init.md",
-    tools=[gmail, memory, calendar, web],  # Gmail + Memory + Calendar + WebFetch
+    tools=email_tools + calendar_tools + [memory, web],
     max_iterations=30,
     model="co/gemini-2.5-pro",
     log=False  # Don't create separate log file
@@ -48,12 +80,12 @@ def init_crm_database(max_emails: int = 500, top_n: int = 10, exclude_domains: s
     return f"CRM INITIALIZATION COMPLETE. Data saved to memory. Use read_memory() to access:\n- crm:all_contacts\n- crm:needs_reply\n- crm:init_report\n- contact:email@example.com\n\nDetails: {result}"
 
 
-# Create main agent with Gmail, Memory, Calendar, Shell, Todo, AND init wrapper function
+# Create main agent with email tools, Memory, Calendar, Shell, Todo, AND init wrapper function
 agent = Agent(
     name="email-agent",
-    system_prompt="prompts/gmail_agent.md",
-    tools=[gmail, memory, calendar, shell, todo, init_crm_database],
-    plugins=[re_act, gmail_plugin, calendar_plugin],  # ReAct + Gmail/Calendar approval
+    system_prompt=system_prompt,
+    tools=email_tools + calendar_tools + [memory, shell, todo, init_crm_database],
+    plugins=plugins,
     max_iterations=15,
     model="co/gemini-2.5-pro",
 )

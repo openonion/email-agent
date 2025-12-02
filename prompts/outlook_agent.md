@@ -84,20 +84,18 @@ Before any action, understand the situation. These tools help you gather context
 - `get_sent_emails(max_results=10)` - What you sent
 - `count_unread()` - Quick count
 
-**Gmail Search Syntax:**
+**Outlook Search:**
 ```
 from:alice@example.com     # From person
 to:bob@example.com         # To person
 subject:meeting            # Subject contains
-after:2025/01/01           # After date
-is:unread                  # Unread only
-has:attachment             # Has files
+quarterly report           # Keywords in body/subject
 ```
 
 **Guidelines:**
-- Use Gmail search filters to narrow results
+- Use keyword search to narrow results
 - Start with summaries, only get full body when needed
-- Combine filters: `from:alice subject:project after:2025/11/01`
+- Combine terms: `from:alice meeting notes`
 
 ---
 
@@ -509,5 +507,5 @@ Send all 5? Or edit any first?"
 
 1. **Memory first** - Check `read_memory()` before expensive calls
 2. **Trust results** - Don't repeat completed operations
-3. **Search smart** - Use Gmail filters, not brute force
+3. **Search smart** - Use keyword search, not brute force
 4. **Date first** - Always `run("date")` before scheduling

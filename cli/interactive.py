@@ -21,6 +21,31 @@ from .contacts_provider import ContactProvider
 
 console = Console()
 
+
+def _set_env_flag(key: str, value: str):
+    """Set a flag in .env file."""
+    from pathlib import Path
+    env_path = Path('.env')
+
+    # Read existing content
+    lines = []
+    if env_path.exists():
+        lines = env_path.read_text().splitlines()
+
+    # Update or add the key
+    found = False
+    for i, line in enumerate(lines):
+        if line.startswith(f'{key}='):
+            lines[i] = f'{key}={value}'
+            found = True
+            break
+
+    if not found:
+        lines.append(f'{key}={value}')
+
+    # Write back
+    env_path.write_text('\n'.join(lines) + '\n')
+
 # Commands with descriptions and icons for StaticProvider
 COMMANDS = [
     ("/today", "/today", "Daily email briefing", "📅"),
@@ -31,6 +56,8 @@ COMMANDS = [
     ("/init", "/init", "Initialize CRM database", "🗄️"),
     ("/unanswered", "/unanswered", "Find unanswered emails", "⏳"),
     ("/identity", "/identity", "Show your email identity", "🆔"),
+    ("/link-gmail", "/link-gmail", "Connect Gmail account", "🔗"),
+    ("/link-outlook", "/link-outlook", "Connect Outlook account", "🔗"),
     ("/help", "/help", "Show all commands", "❓"),
     ("/quit", "/quit", "Exit", "👋"),
 ]
@@ -175,6 +202,18 @@ def interactive():
                 with console.status("[bold blue]Getting identity...[/bold blue]"):
                     result = do_identity()
                 console.print(Panel(result, title="[bold]Identity[/bold]", border_style="cyan"))
+
+            elif cmd == '/link-gmail':
+                import subprocess
+                subprocess.run(['co', 'auth', 'google'])
+                _set_env_flag('LINKED_GMAIL', 'true')
+                console.print("\n[green]✓ Gmail connected. Restart the CLI to use it.[/green]")
+
+            elif cmd == '/link-outlook':
+                import subprocess
+                subprocess.run(['co', 'auth', 'microsoft'])
+                _set_env_flag('LINKED_OUTLOOK', 'true')
+                console.print("\n[green]✓ Outlook connected. Restart the CLI to use it.[/green]")
 
             elif cmd.startswith('/'):
                 # Unknown command - suggest using /help

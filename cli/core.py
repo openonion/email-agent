@@ -97,3 +97,9 @@ def do_today() -> str:
 
 def do_ask(question: str) -> str:
     return agent.input(question)
+
+
+def do_host(port: int = 8000, trust: str = "careful"):
+    """Start the agent as an HTTP/WebSocket server."""
+    from connectonion import host
+    host(agent, port=port, trust=trust)

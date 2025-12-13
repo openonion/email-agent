@@ -11,7 +11,7 @@ from rich.markdown import Markdown
 
 from .core import (
     do_inbox, do_search, do_contacts, do_sync,
-    do_init, do_unanswered, do_identity, do_today, do_ask
+    do_init, do_unanswered, do_identity, do_today, do_ask, do_host
 )
 from .setup import check_setup
 from .interactive import interactive
@@ -119,3 +119,13 @@ def ask(question: str = typer.Argument(..., help="Question to ask the agent")):
     with console.status("[bold blue]Thinking...[/bold blue]"):
         result = do_ask(question)
     console.print(Panel(Markdown(result), title="[bold blue]Agent[/bold blue]", border_style="blue"))
+
+
+@app.command()
+def host(
+    port: int = typer.Option(8000, "--port", "-p", help="Port to listen on"),
+    trust: str = typer.Option("careful", "--trust", "-t", help="Trust level: open/careful/strict")
+):
+    """Start as HTTP/WebSocket server."""
+    console.print(f"[bold cyan]Starting server on port {port}...[/bold cyan]")
+    do_host(port=port, trust=trust)

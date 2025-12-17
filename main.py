@@ -8,4 +8,6 @@ Usage: co deploy (uses this file as entrypoint)
 from agent import agent
 from connectonion import host
 
-host(agent)
+# trust="strict" requires signed requests with Ed25519 signature
+# This prevents unauthorized access to email tools
+host(agent, trust="strict")

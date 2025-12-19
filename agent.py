@@ -55,7 +55,7 @@ init_crm = Agent(
     system_prompt="prompts/crm_init.md",
     tools=email_tools + calendar_tools + [memory, web],
     max_iterations=30,
-    model="co/gemini-2.5-pro",
+    model="co/gemini-3-pro-preview",
     log=False  # Don't create separate log file
 )
 
@@ -84,10 +84,10 @@ def init_crm_database(max_emails: int = 500, top_n: int = 10, exclude_domains: s
 agent = Agent(
     name="email-agent",
     system_prompt=system_prompt,
-    tools=email_tools + calendar_tools + [memory, shell, todo, init_crm_database],
-    plugins=plugins,
+    tools=[email_tools, calendar_tools,memory, shell, todo, init_crm_database],
+    plugins=[re_act, gmail_plugin, calendar_plugin],
     max_iterations=15,
-    model="co/gemini-2.5-pro",
+    model="co/o4-mini",
 )
 
 # Example usage

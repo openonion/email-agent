@@ -95,7 +95,7 @@ def interactive():
             # Status bar at top
             status = StatusBar([
                 ("📧", "Email Agent", "cyan"),
-                ("🤖", "co/gemini-2.5-pro", "magenta"),
+                ("🤖", f"co/{agent.llm.model}", "magenta"),
             ])
             console.print()
             console.print(status.render())

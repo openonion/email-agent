@@ -5,14 +5,17 @@ These functions are shared by CLI commands and interactive slash commands.
 """
 
 from connectonion import SlashCommand
-from agent import agent, email_tools
+from agent import agent
 
 
 def _get_email_tool():
     """Get the first configured email tool (Gmail or Outlook)."""
-    if not email_tools:
-        return None
-    return email_tools[0]
+    # Access via agent's tool registry
+    if hasattr(agent.tools, 'gmail'):
+        return agent.tools.gmail
+    if hasattr(agent.tools, 'outlook'):
+        return agent.tools.outlook
+    return None
 
 
 def do_inbox(count: int = 10, unread: bool = False) -> str:
@@ -58,7 +61,7 @@ def do_unanswered(days: int = 120, count: int = 20) -> str:
     if not email:
         return "No email account connected. Use /link-gmail or /link-outlook to connect."
     if hasattr(email, 'get_unanswered_emails'):
-        return email.get_unanswered_emails(older_than_days=days, max_results=count)
+        return email.get_unanswered_emails(within_days=days, max_results=count)
     return "Unanswered email tracking not available for this provider."
 
 

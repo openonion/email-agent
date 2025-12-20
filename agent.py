@@ -16,29 +16,28 @@ web = WebFetch()  # For analyzing contact domains
 shell = Shell()  # For running shell commands (e.g., get current date)
 todo = TodoList()  # For tracking multi-step tasks
 
-# Build email/calendar tools based on .env flags
-# Note: Only one provider at a time (tools have overlapping method names)
-email_tools = []
-calendar_tools = []
-plugins = [re_act]
-
+# Build tools list based on .env flags
+# Note: Only one email provider at a time (tools have overlapping method names)
 has_gmail = os.getenv("LINKED_GMAIL", "").lower() == "true"
 has_outlook = os.getenv("LINKED_OUTLOOK", "").lower() == "true"
+
+tools = []
+plugins = [re_act]
 
 # Prefer Gmail if both are linked (can only use one due to method name conflicts)
 if has_gmail:
     from connectonion import Gmail, GoogleCalendar
-    email_tools.append(Gmail())
-    calendar_tools.append(GoogleCalendar())
+    tools.append(Gmail())
+    tools.append(GoogleCalendar())
     plugins.append(gmail_plugin)
     plugins.append(calendar_plugin)
 elif has_outlook:
     from connectonion import Outlook, MicrosoftCalendar
-    email_tools.append(Outlook())
-    calendar_tools.append(MicrosoftCalendar())
+    tools.append(Outlook())
+    tools.append(MicrosoftCalendar())
 
 # Warn if no email provider configured
-if not email_tools:
+if not tools:
     print("\n⚠️  No email account connected. Use /link-gmail or /link-outlook to connect.\n")
 
 # Select prompt based on linked provider
@@ -53,9 +52,9 @@ else:
 init_crm = Agent(
     name="crm-init",
     system_prompt="prompts/crm_init.md",
-    tools=email_tools + calendar_tools + [memory, web],
+    tools=tools + [memory, web],
     max_iterations=30,
-    model="co/gemini-3-pro-preview",
+    model="gemini-3-pro-preview",
     log=False  # Don't create separate log file
 )
 
@@ -80,14 +79,17 @@ def init_crm_database(max_emails: int = 500, top_n: int = 10, exclude_domains: s
     return f"CRM INITIALIZATION COMPLETE. Data saved to memory. Use read_memory() to access:\n- crm:all_contacts\n- crm:needs_reply\n- crm:init_report\n- contact:email@example.com\n\nDetails: {result}"
 
 
-# Create main agent with email tools, Memory, Calendar, Shell, Todo, AND init wrapper function
+# Add remaining tools to the list
+tools.extend([memory, shell, todo, init_crm_database])
+
+# Create main agent
 agent = Agent(
     name="email-agent",
     system_prompt=system_prompt,
-    tools=[email_tools, calendar_tools,memory, shell, todo, init_crm_database],
-    plugins=[re_act, gmail_plugin, calendar_plugin],
+    tools=tools,
+    plugins=plugins,
     max_iterations=15,
-    model="co/o4-mini",
+    model="co/gemini-2.5-flash",
 )
 
 # Example usage

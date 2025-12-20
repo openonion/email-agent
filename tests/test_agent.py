@@ -50,7 +50,8 @@ def test_agent_no_email_tools_when_not_linked():
     import agent as agent_module
     importlib.reload(agent_module)
 
-    assert len(agent_module.email_tools) == 0
+    assert not hasattr(agent_module.agent.tools, 'gmail')
+    assert not hasattr(agent_module.agent.tools, 'outlook')
 
 
 def test_agent_has_memory_tools():

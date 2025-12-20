@@ -225,7 +225,7 @@ class TestDoUnanswered:
         result = do_unanswered()
 
         mock_email.get_unanswered_emails.assert_called_once_with(
-            older_than_days=120,
+            within_days=120,
             max_results=20
         )
 
@@ -240,7 +240,7 @@ class TestDoUnanswered:
         do_unanswered(days=30, count=50)
 
         mock_email.get_unanswered_emails.assert_called_once_with(
-            older_than_days=30,
+            within_days=30,
             max_results=50
         )
 
@@ -375,8 +375,7 @@ class TestProviderSelection:
         import agent as agent_module
         importlib.reload(agent_module)
 
-        assert len(agent_module.email_tools) == 1
-        assert agent_module.email_tools[0].__class__.__name__ == 'Gmail'
+        assert hasattr(agent_module.agent.tools, 'gmail')
         assert agent_module.system_prompt == 'prompts/gmail_agent.md'
 
     def test_outlook_selected_when_linked(self):
@@ -389,8 +388,7 @@ class TestProviderSelection:
         import agent as agent_module
         importlib.reload(agent_module)
 
-        assert len(agent_module.email_tools) == 1
-        assert agent_module.email_tools[0].__class__.__name__ == 'Outlook'
+        assert hasattr(agent_module.agent.tools, 'outlook')
         assert agent_module.system_prompt == 'prompts/outlook_agent.md'
 
     def test_gmail_preferred_when_both_linked(self):
@@ -404,8 +402,8 @@ class TestProviderSelection:
         importlib.reload(agent_module)
 
         # Should only have Gmail (not both, to avoid duplicate tool names)
-        assert len(agent_module.email_tools) == 1
-        assert agent_module.email_tools[0].__class__.__name__ == 'Gmail'
+        assert hasattr(agent_module.agent.tools, 'gmail')
+        assert not hasattr(agent_module.agent.tools, 'outlook')
 
     def test_no_tools_when_nothing_linked(self):
         """Verify no email tools when nothing linked."""
@@ -417,4 +415,5 @@ class TestProviderSelection:
         import agent as agent_module
         importlib.reload(agent_module)
 
-        assert len(agent_module.email_tools) == 0
+        assert not hasattr(agent_module.agent.tools, 'gmail')
+        assert not hasattr(agent_module.agent.tools, 'outlook')

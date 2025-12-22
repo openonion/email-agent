@@ -42,14 +42,10 @@ htmlcov/
 .DS_Store
 
 # ConnectOnion
-.co/logs/
-.co/keys.env
+.co/
 
 # Data
-data/*.db
-data/*.sqlite
-data/contacts.csv
-data/cache/
+data/
 
 # Temporary files
 *.log

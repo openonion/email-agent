@@ -111,3 +111,29 @@ class ContactProvider:
 
         # Sort by score (highest first)
         return sorted(results, key=lambda x: -x.score)
+
+    def to_command_items(self) -> list:
+        """Convert contacts to Textual CommandItem format for autocomplete.
+
+        Returns list of CommandItem (DropdownItem from textual-autocomplete).
+        Uses main for display (name - email), id for inserted value (@email).
+        """
+        from connectonion.tui import CommandItem
+
+        contacts = self._load_contacts()
+        items = []
+
+        for contact in contacts:
+            email = contact["email"]
+            name = contact.get("name", "")
+
+            # Display: name - email (or just email if no name)
+            display = f"{name} - {email}" if name else email
+
+            items.append(CommandItem(
+                main=display,
+                prefix=self._get_icon(contact),
+                id=f"@{email}",
+            ))
+
+        return items

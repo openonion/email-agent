@@ -54,7 +54,7 @@ init_crm = Agent(
     system_prompt="prompts/crm_init.md",
     tools=tools + [memory, web],
     max_iterations=30,
-    model="gemini-3-pro-preview",
+    model="co/claude-sonnet-4-5",
     log=False  # Don't create separate log file
 )
 
@@ -89,7 +89,7 @@ agent = Agent(
     tools=tools,
     plugins=plugins,
     max_iterations=15,
-    model="co/gemini-2.5-flash",
+    model="co/claude-sonnet-4-5",
 )
 
 # Example usage
